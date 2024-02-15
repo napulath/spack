@@ -3,11 +3,12 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-# flake8: noqa: F401
+# flake8: noqa: F401, E402
 """spack.util.package is a set of useful build tools and directives for packages.
 
 Everything in this module is automatically imported into Spack package files.
 """
+
 from os import chdir, environ, getcwd, makedirs, mkdir, remove, removedirs
 from shutil import move, rmtree
 
