@@ -133,6 +133,12 @@ class RustBootstrap(Package):
         if os in rust_releases[release] and target in rust_releases[release][os]:
             version(release, sha256=rust_releases[release][os][target])
 
+    # rust-ldd and libLLVM both depend on zlib, which is not vendored.
+    depends_on("zlib-api")
+    depends_on("zlib-ng +shared", when="^[virtuals=zlib-api] zlib-ng")
+    depends_on("zlib +shared", when="^[virtuals=zlib-api] zlib")
+    depends_on("patchelf@0.13:", type="build")
+
     def url_for_version(self, version):
         if self.os not in ("linux", "darwin"):
             return None
@@ -151,11 +157,16 @@ class RustBootstrap(Package):
         url = "https://static.rust-lang.org/dist/rust-{0}-{1}-{2}.tar.gz"
         return url.format(version, target, os)
 
+    @run_before("install", when="platform=linux")
+    def fixup_rpaths(self):
+        # set rpaths of libLLVM.so and rust-ldd to zlib's lib directory
+        rpaths = self.spec["zlib-api"].libs.directories
+
+        for binary in find(self.stage.source_path, ["libLLVM.so.*", "rust-lld"]):
+            patchelf = Executable("patchelf")
+            patchelf("--add-rpath", ":".join(rpaths), binary)
+
     def install(self, spec, prefix):
         install_script = Executable("./install.sh")
         install_args = [f"--prefix={prefix}", "--without=rust-docs"]
         install_script(" ".join(install_args))
-
-    # rust-bootstrap's prebuilt libLLVM.so is missing a dependency on zlib,
-    # meaning its rpaths should be patched
-    unresolved_libraries = ["libz.so.*"]
