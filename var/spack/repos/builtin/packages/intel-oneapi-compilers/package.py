@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 import os
 import os.path
+import pathlib
 import platform
 import warnings
 
@@ -584,6 +585,21 @@ class IntelOneapiCompilers(IntelOneApiPackage, CompilerPackage):
             p = join_path(self.component_prefix.linux, d)
             if find(p, "*." + dso_suffix, recursive=False):
                 yield p
+
+    @classmethod
+    def determine_variants(cls, exes, version_str):
+        variant, extra_attributes = super().determine_variants(exes, version_str)
+
+        bin_dirs = {pathlib.Path(x).parent for x in exes}
+        if len(bin_dirs) != 1:
+            dirs = ", ".join([str(x) for x in sorted(bin_dirs)])
+            raise RuntimeError(f"executables found in multiple dirs: {dirs}")
+        bin_dir = bin_dirs.pop()
+        prefix_parts = bin_dir.parts[: bin_dir.parts.index("compiler")]
+        computed_prefix = pathlib.Path(*prefix_parts)
+        extra_attributes["prefix"] = str(computed_prefix)
+
+        return variant, extra_attributes
 
     @classmethod
     def runtime_constraints(cls, *, spec, pkg):

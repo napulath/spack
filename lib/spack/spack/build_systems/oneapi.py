@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 """Common utilities for managing intel oneapi packages."""
 import os
-import pathlib
 import platform
 import shutil
 from os.path import basename, isdir
@@ -73,16 +72,6 @@ class IntelOneApiPackage(Package):
     def component_prefix(self):
         """Path to component <prefix>/<component>/<version>."""
         v = self.spec.version.up_to(2) if self.v2_layout else self.spec.version
-        prefix_parts = pathlib.Path(str(self.prefix)).parts
-        try:
-            idx_component = prefix_parts.index(self.component_dir)
-            idx_version = prefix_parts[idx_component:].index(str(v))
-        except ValueError:
-            return self.prefix.join(self.component_dir).join(str(v))
-
-        if idx_version == 1:
-            return self.prefix
-
         return self.prefix.join(self.component_dir).join(str(v))
 
     @property
