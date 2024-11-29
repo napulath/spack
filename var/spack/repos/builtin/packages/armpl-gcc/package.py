@@ -407,7 +407,8 @@ class ArmplGcc(Package):
     provides("fftw-api@3")
 
     depends_on("c", type="build")
-    requires("^[virtuals=c] gcc", msg="armpl-gcc is only compatible with the GCC compiler")
+    depends_on("fortran", type="build")
+    requires("^[virtuals=c,fortran] gcc", msg="armpl-gcc is only compatible with the GCC compiler")
 
     # Run the installer with the desired install directory
     def install(self, spec, prefix):
