@@ -42,7 +42,7 @@ spack:
     vtk-m:
       require: "+examples %gcc@9.4.0 target=ppc64le"
     cuda:
-      require: "@11.4.4 %gcc@9.4.0 target=ppc64le"
+      require: "@11.4.4 target=ppc64le"
     paraview:
       require: "+examples %gcc@9.4.0 target=ppc64le"
 
